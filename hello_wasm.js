@@ -1,23 +1,19 @@
-function print(arg) {
-  console.log('level 2: ' + arg);
+async function instantiate(url, imports) {
+  const response = await fetch(url);
+  const moduleData = await response.arrayBuffer();
+  const module = await WebAssembly.compile(moduleData);
+  return new WebAssembly.Instance(module, {imports});
 }
 
-function load_module(module, imports) {
-  return fetch(module)
-      .then(response => response.arrayBuffer())
-      .then(
-          array_buffer =>
-              WebAssembly.compile(array_buffer)
-                  .then(module => new WebAssembly.Instance(module, imports)));
-}
+(async function() {
+  const {exports: {foo42}} = await instantiate('42.wasm', {global: 0, callback(arg) {
+    console.log(`called from foo42: ${arg}`);
+  }});
 
+  const {exports: {foo43}} = await instantiate('43.wasm', {global: 1, callback(arg) {
+    console.log(`called from foo43: ${arg}`);
+    foo42();
+  }});
 
-const print_module = load_module('42.wasm', {imports: {global: 0, callback: print}});
-
-function proxy(arg) {
-  console.log('level 1: ' + arg);
-  print_module.then(module => module.exports.level_down());
-}
-
-const proxy_module = load_module('43.wasm', {imports: {global: 1, callback: proxy}});
-proxy_module.then(module => module.exports.level_down());
+  foo43();
+})();

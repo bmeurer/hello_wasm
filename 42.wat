@@ -1,7 +1,7 @@
 (module
   (global $global (import "imports" "global") i32)
   (func $callback (import "imports" "callback") (param i32))
-  (func (export "level_down") (local i32)
+  (func (export "foo42") (local i32)
     global.get $global
     local.set 0
     global.get $global
