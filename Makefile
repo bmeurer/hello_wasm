@@ -7,5 +7,7 @@ $(TARGET)/%: %
 	cp $^ $@
 
 %.wasm: %.wat
-	wat2wasm $^
+	wat2wasm --debug-names $^
 
+clean:
+	rm -f $(addprefix $(TARGET)/,$(FILES))
